@@ -1,0 +1,4 @@
+what,kind,bundleId,bundleVersion,description,time
+started,bundle,org.eclipse.mylyn.monitor.ui,3.2.2.v20090912-0400-e3x,"org.eclipse.mylyn.monitor.ui",1488533366930
+started,bundle,org.eclipse.epp.usagedata.ui,1.1.0.R200906100410,"org.eclipse.epp.usagedata.ui",1488533367801
+deactivated,workbench,org.eclipse.ui.workbench,3.5.2.M20100113-0800,"",1488533368482

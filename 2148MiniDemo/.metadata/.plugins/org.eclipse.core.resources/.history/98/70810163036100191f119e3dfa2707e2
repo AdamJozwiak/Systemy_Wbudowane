@@ -1,0 +1,108 @@
+#include "pre_emptive_os/api/osapi.h"
+#include "pre_emptive_os/api/general.h"
+#include "lcd.h"
+#include <printf_P.h>
+#include <ea_init.h>
+#include <lpc2xxx.h>
+#include <consol.h>
+#define start_STACK_SIZE 2048
+#define INIT_STACK_SIZE  400
+#define SPI_SLAVE_CS 0x00002000  //pin P0.13
+#define ENC_RESET    0x00001000  //pin P0.12
+#define FAILSAFE_VALUE 5000
+
+static void start(void* arg);
+static void initProc(void* arg);
+
+void initLCD(void);
+
+
+
+/*****************************************************************************
+
+ ****************************************************************************/
+int main(void) 
+{
+	static tU8 initStack[INIT_STACK_SIZE];
+	tU8 error;
+	tU8 pid;
+	IODIR0 |= 0x00000080u;                                  //GPIO port direction control register; pin jako wyjscie
+	IOSET0 = 0x00000080u;                                   //GPIO port output set register; 1 na wybranym bicie portu
+	osInit();
+	osCreateProcess(initProc, initStack, INIT_STACK_SIZE, &pid, 1, NULL, &error);
+	osStartProcess(pid, &error);                           //rozpocznij proces
+	osStart();
+	return 0;
+}
+
+/*****************************************************************************
+ Inicjalizacja - wywołanie funkcji start
+ ****************************************************************************/
+static void initProc(void* arg) 
+{
+	static tU8 startStack[start_STACK_SIZE];
+	static tU8 pid1;
+	tU8 error;
+	eaInit();
+	osCreateProcess(start, startStack, start_STACK_SIZE, &pid1, 3, NULL, &error);
+	osStartProcess(pid1, &error);
+	osDeleteProcess();
+}
+
+static void start(void* arg) 
+{
+		testLcd();
+		displayClear();
+		/*writeTxt("    Refleks!");
+		osSleep(100);
+		displayClear();
+		writeTxt(" Sprawdz  Swoja");
+		enter();
+		writeTxt(" !!!SZYBKOSC!!!");
+		tU8 i;
+		for(i=0; i<10; i++)
+		{
+			lcdBacklight(FALSE);
+			osSleep(9);
+			lcdBacklight(TRUE);
+			osSleep(9);
+
+		}
+
+		osSleep(200);
+		displayClear();*/
+		 lcdInit();
+
+		IOPIN &= ~0x001f0000;
+		for(;;)
+		    {
+				  if ((IOPIN & 0x00100000) == 0)
+				  {
+					  writeTxt("dol");
+					  osSleep(60);
+					  displayClear();
+				  }
+				  else if ((IOPIN & 0x00080000) == 0)
+					  {
+						  writeTxt("lewo");
+						  osSleep(60);
+						  displayClear();
+					  }
+				  else if ((IOPIN & 0x00040000) == 0)
+					  {
+						  writeTxt("prawo");
+						  osSleep(60);
+						  displayClear();
+					  }
+				  else if ((IOPIN & 0x00020000) == 0)
+					  {
+						  writeTxt("gora");
+						  osSleep(60);
+						  displayClear();
+					  }
+		    }
+}
+void appTick(tU32 elapsedTime)
+{
+	
+}
